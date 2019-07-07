@@ -263,6 +263,12 @@ void MicroOpPerformanceModel::CPUTraceGen(DynamicInstruction *dynins)
 
 void MicroOpPerformanceModel::handleInstruction(DynamicInstruction *dynins)
 {
+   if (cpu_trace_gen_mode)
+   {
+      CPUTraceGen(dynins);
+      return; 
+   }
+
    ComponentPeriod insn_period = *(const_cast<ComponentPeriod*>(static_cast<const ComponentPeriod*>(m_elapsed_time)));
    std::vector<DynamicMicroOp*> current_uops;
 
