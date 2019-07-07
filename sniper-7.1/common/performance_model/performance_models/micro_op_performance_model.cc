@@ -232,7 +232,7 @@ void MicroOpPerformanceModel::CPUTraceGen(DynamicInstruction *dynins)
             if (load_base_index != SIZE_MAX)
             {
                size_t load_index = load_base_index + num_reads_done;
-
+               assert(lw_micro_ops[load_index].op_type == "Load");
                lw_micro_ops[load_index].address = info.addr;
                ++num_reads_done;
             }
@@ -243,7 +243,7 @@ void MicroOpPerformanceModel::CPUTraceGen(DynamicInstruction *dynins)
             if (store_base_index != SIZE_MAX)
             {
                size_t store_index = store_base_index + num_writes_done;
-
+               assert(lw_micro_ops[store_index].op_type == "Store");
                lw_micro_ops[store_index].address = info.addr;
                ++num_writes_done;
             }
