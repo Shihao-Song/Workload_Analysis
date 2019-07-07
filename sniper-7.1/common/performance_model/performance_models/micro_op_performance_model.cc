@@ -90,6 +90,14 @@ MicroOpPerformanceModel::MicroOpPerformanceModel(Core *core, bool issue_memops)
       m_memaccess_uop->setFirst(true);
       m_memaccess_uop->setLast(true);
    }
+
+   // For CPU-trace extraction
+   if (Sim()->getCfg()->cpu_trace_out_file != "N/A")
+   {
+      cpu_trace_gen_mode = true;
+      String out_file = Sim()->getCfg()->cpu_trace_out_file;
+      cpu_trace.open(std::string(out_file.c_str()));
+   }
 }
 
 MicroOpPerformanceModel::~MicroOpPerformanceModel()

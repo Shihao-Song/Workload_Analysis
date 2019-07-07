@@ -95,7 +95,11 @@ TraceThread::TraceThread(Thread *thread, SubsecondTime time_start, String tracef
    }
 
    thread->setVa2paFunc(_va2pa, (UInt64)this);
-   
+  
+   if (Sim()->getCfg()->cpu_trace_out_file != "N/A")
+   {
+      cpu_trace_gen_mode = true;
+   } 
 }
 
 TraceThread::~TraceThread()

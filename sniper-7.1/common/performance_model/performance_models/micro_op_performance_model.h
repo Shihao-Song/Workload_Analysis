@@ -76,8 +76,7 @@ private:
    };
    std::vector<Micro_Op_Light_Weight>lw_micro_ops;
 
-   // bool cpu_trace_gen_mode = false;
-   bool cpu_trace_gen_mode = true;
+   bool cpu_trace_gen_mode = false;
    std::ofstream cpu_trace;
    void CPUTraceGen(DynamicInstruction *dynins);
    void CPUTraceOutput()
@@ -86,14 +85,14 @@ private:
       {
          if (micro_op.op_type == "Exe")
          {
-            std::cout << micro_op.op_type << " "
-            // cpu_trace << micro_op.op_type << " "
+            // std::cout << micro_op.op_type << " "
+            cpu_trace << micro_op.op_type << " "
                       << micro_op.EIP << "\n";
          }
          else
          {
-            std::cout << micro_op.op_type << " "
-            // cpu_trace << micro_op.op_type << " "
+            // std::cout << micro_op.op_type << " "
+            cpu_trace << micro_op.op_type << " "
                       << micro_op.EIP << " "
                       << micro_op.address << "\n";
          }
