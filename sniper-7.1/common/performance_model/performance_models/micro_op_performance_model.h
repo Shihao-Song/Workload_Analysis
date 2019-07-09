@@ -114,7 +114,10 @@ private:
 
    // Define a protobuf object, cpu_trace;
    CPUTrace::TraceFile cpu_trace;
-   
+   UInt64 passed_instructions = 0;
+   UInt64 collected_instructions = 0;
+   UInt64 num_fires_done = 0;
+
    void CPUTraceGen(DynamicInstruction *dynins);
    void CPUTraceOutput()
    {

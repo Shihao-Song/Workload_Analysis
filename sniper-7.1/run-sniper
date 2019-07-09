@@ -227,7 +227,7 @@ try:
       "isa=",
       "frontend=",
 
-      "cpu_trace_out_file="
+      "cpu_trace_out_dir="
     ] + record_trace_passthrough
   )
 except getopt.GetoptError, e:
@@ -365,9 +365,9 @@ for o, a in opts:
     trace_extra_args.append(o)
   if o.startswith('--') and o[2:]+'=' in record_trace_passthrough:
     trace_extra_args += [o, a]
-  if o == '--cpu_trace_out_file':
+  if o == '--cpu_trace_out_dir':
     cpu_trace_gen_mode = True
-    cpu_trace_out_file = a
+    cpu_trace_out_dir = a
 
 if cmdline:
   if use_mpi or use_sift:
@@ -477,7 +477,7 @@ if not configfiles:
 sniperoptions = [ '--config=%s' % cfgfile for cfgfile in configfiles ] + sniperoptions
 
 if cpu_trace_gen_mode:
-  sniperoptions.append('-g --cpu_trace_out_file=' + cpu_trace_out_file)
+  sniperoptions.append('-g --cpu_trace_out_dir=' + cpu_trace_out_dir)
 
 if roi_only or use_mpi:
   sniperoptions.append('-g --general/magic=true')

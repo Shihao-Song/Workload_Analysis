@@ -106,9 +106,9 @@ void handle_generic_arg(const String &str, config::ConfigFile & cfg)
    String & value(split_args[1]);
 
    // For our experiments
-   if (setting == "cpu_trace_out_file")
+   if (setting == "cpu_trace_out_dir")
    {
-       cfg.cpu_trace_out_file = value;
+       cfg.cpu_trace_out_dir = value;
        return;
    }
 

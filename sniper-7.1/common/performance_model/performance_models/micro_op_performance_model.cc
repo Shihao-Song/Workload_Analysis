@@ -27,9 +27,15 @@ MicroOpPerformanceModel::MicroOpPerformanceModel(Core *core, bool issue_memops)
     , m_dyninsn_count(0)
     , m_dyninsn_cost(0)
     , m_dyninsn_zero_count(0)
-    , cpu_trace_out_dir(Sim()->getCfg()->cpu_trace_out_file)
+    , cpu_trace_out_dir(Sim()->getCfg()->cpu_trace_out_dir)
     , cpu_trace_gen_mode(strcmp(cpu_trace_out_dir.c_str(), "N/A") != 0 ? true : false)
 {
+   if (cpu_trace_gen_mode)
+   {
+      std::cout << "[Performance model] CPU-trace generation mode. ";
+      std::cout << "Performance model is disabled. \n";
+   }
+
    registerStatsMetric("performance_model", core->getId(), "dyninsn_count", &m_dyninsn_count);
    registerStatsMetric("performance_model", core->getId(), "dyninsn_cost", &m_dyninsn_cost);
    registerStatsMetric("performance_model", core->getId(), "dyninsn_zero_count", &m_dyninsn_zero_count);

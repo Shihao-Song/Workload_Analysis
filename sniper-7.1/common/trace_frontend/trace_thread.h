@@ -148,7 +148,7 @@ class TraceThread : public Runnable
 
    // For our experiments
    private:
-      bool cpu_trace_gen_mode = false;
+      const bool cpu_trace_gen_mode = false;
 };
 
 #endif // __TRACE_THREAD_H

@@ -37,7 +37,7 @@ namespace config
     class Config
     {
         public:
-            String cpu_trace_out_file = "N/A";
+            String cpu_trace_out_dir = "N/A";
 
         public:
             Config(bool case_sensitive = false): m_case_sensitive(case_sensitive), m_root("", case_sensitive){}

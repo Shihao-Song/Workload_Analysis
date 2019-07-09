@@ -55,7 +55,13 @@ TraceThread::TraceThread(Thread *thread, SubsecondTime time_start, String tracef
    , m_cleanup(cleanup)
    , m_started(false)
    , m_stopped(false)
+   , cpu_trace_gen_mode(strcmp(Sim()->getCfg()->cpu_trace_out_dir.c_str(), "N/A") 
+                        != 0 ? true : false)
 {
+   if (cpu_trace_gen_mode)
+   {
+      std::cout << "[Trace thread] CPU-trace generation mode. va2pa is disabled. \n";
+   }
 
    //if (!xed_initialized)
    //{
@@ -95,11 +101,6 @@ TraceThread::TraceThread(Thread *thread, SubsecondTime time_start, String tracef
    }
 
    thread->setVa2paFunc(_va2pa, (UInt64)this);
-  
-   if (Sim()->getCfg()->cpu_trace_out_file != "N/A")
-   {
-      cpu_trace_gen_mode = true;
-   } 
 }
 
 TraceThread::~TraceThread()
