@@ -27,6 +27,8 @@ MicroOpPerformanceModel::MicroOpPerformanceModel(Core *core, bool issue_memops)
     , m_dyninsn_count(0)
     , m_dyninsn_cost(0)
     , m_dyninsn_zero_count(0)
+    , cpu_trace_out_dir(Sim()->getCfg()->cpu_trace_out_file)
+    , cpu_trace_gen_mode(strcmp(cpu_trace_out_dir.c_str(), "N/A") != 0 ? true : false)
 {
    registerStatsMetric("performance_model", core->getId(), "dyninsn_count", &m_dyninsn_count);
    registerStatsMetric("performance_model", core->getId(), "dyninsn_cost", &m_dyninsn_cost);
@@ -89,14 +91,6 @@ MicroOpPerformanceModel::MicroOpPerformanceModel(Core *core, bool issue_memops)
       m_memaccess_uop->setMemBarrier(true);
       m_memaccess_uop->setFirst(true);
       m_memaccess_uop->setLast(true);
-   }
-
-   // For CPU-trace extraction
-   if (Sim()->getCfg()->cpu_trace_out_file != "N/A")
-   {
-      cpu_trace_gen_mode = true;
-      String out_file = Sim()->getCfg()->cpu_trace_out_file;
-      cpu_trace.open(std::string(out_file.c_str()));
    }
 }
 
@@ -163,7 +157,6 @@ void MicroOpPerformanceModel::CPUTraceGen(DynamicInstruction *dynins)
 {
    // 1. Get all the micro-ops
    UInt64 PC = dynins->eip;
-   // assert(PC == dynins->instruction->getAddress());
 
    size_t num_loads = 0;
    size_t num_stores = 0;
@@ -186,16 +179,16 @@ void MicroOpPerformanceModel::CPUTraceGen(DynamicInstruction *dynins)
          const MicroOp *tmp = *it;
 
          Micro_Op_Light_Weight micro_op;
-         micro_op.EIP = PC;
+         micro_op.setEIP(PC);
 
          if (tmp->isExecute())
          {
-            micro_op.op_type = "Exe";
+            micro_op.setExe();
             // exec_base_index = m;
          }
          if (tmp->isStore())
          {
-            micro_op.op_type = "Store";
+            micro_op.setStore();
 
             ++num_stores;
             if (store_base_index == SIZE_MAX)
@@ -205,7 +198,7 @@ void MicroOpPerformanceModel::CPUTraceGen(DynamicInstruction *dynins)
          }
          if (tmp->isLoad())
          {
-            micro_op.op_type = "Load";
+            micro_op.setLoad();
 
             ++num_loads;
             if (load_base_index == SIZE_MAX)
@@ -240,8 +233,8 @@ void MicroOpPerformanceModel::CPUTraceGen(DynamicInstruction *dynins)
             if (load_base_index != SIZE_MAX)
             {
                size_t load_index = load_base_index + num_reads_done;
-               assert(lw_micro_ops[load_index].op_type == "Load");
-               lw_micro_ops[load_index].address = info.addr;
+               assert(lw_micro_ops[load_index].isLoad());
+               lw_micro_ops[load_index].setLoadStoreAddr(info.addr);
                ++num_reads_done;
             }
          }
@@ -251,8 +244,8 @@ void MicroOpPerformanceModel::CPUTraceGen(DynamicInstruction *dynins)
             if (store_base_index != SIZE_MAX)
             {
                size_t store_index = store_base_index + num_writes_done;
-               assert(lw_micro_ops[store_index].op_type == "Store");
-               lw_micro_ops[store_index].address = info.addr;
+               assert(lw_micro_ops[store_index].isStore());
+               lw_micro_ops[store_index].setLoadStoreAddr(info.addr);
                ++num_writes_done;
             }
          }

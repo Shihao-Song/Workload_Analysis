@@ -68,20 +68,57 @@ private:
    SubsecondTime m_cpiMemAccess;
 
   private:
-    // For our experiments
-    struct Micro_Op_Light_Weight
+   // Trace collections.
+   struct Micro_Op_Light_Weight
    {
-      std::string op_type;
-      UInt64 EIP;
-      UInt64 address; // L/S address
+      UInt64 eip;
+
+      enum class Operation : int
+      {
+         LOAD,
+         STORE,
+         EXE,
+         MAX
+      }opr;
+
+      UInt64 load_or_store_addr; // L/S address
+      UInt64 size;
+
+      void setEIP(UInt64 _eip) {eip = _eip;}
+
+      void setLoad() {opr = Operation::LOAD;}
+      bool isLoad() {return opr == Operation::LOAD;}
+
+      void setStore() {opr = Operation::STORE;}
+      bool isStore() {return opr == Operation::STORE;}
+
+      void setExe() {opr = Operation::EXE;}
+      bool isExe() {return opr == Operation::EXE;}
+
+      void setLoadStoreAddr(UInt64 addr) {load_or_store_addr = addr;}
+      void setPayloadSize(UInt64 _size) {size = _size;}
    };
    std::vector<Micro_Op_Light_Weight>lw_micro_ops;
 
-   bool cpu_trace_gen_mode = false;
-   std::ofstream cpu_trace;
+   // The directory that contains all the generated CPU traces.
+   const String cpu_trace_out_dir;
+
+   // Are we in CPU trace gen mode?
+   const bool cpu_trace_gen_mode = false;
+   // Collect traces every () instructions, default: 250M instructions.
+   const UInt64 fire_duration = 250000000;
+   // Number of instructions to collect for every firing, default: 10M instructions.
+   const UInt64 num_instructions = 10000000;
+   // Number of fires, default: 8
+   const UInt64 num_fires = 8;
+
+   // Define a protobuf object, cpu_trace;
+   CPUTrace::TraceFile cpu_trace;
+   
    void CPUTraceGen(DynamicInstruction *dynins);
    void CPUTraceOutput()
    {
+      /*
       for (auto micro_op : lw_micro_ops)
       {
          if (micro_op.op_type == "Exe")
@@ -98,6 +135,7 @@ private:
                       << micro_op.address << "\n";
          }
       }
+      */
    }
 
 };
