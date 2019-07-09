@@ -241,6 +241,7 @@ void MicroOpPerformanceModel::CPUTraceGen(DynamicInstruction *dynins)
                size_t load_index = load_base_index + num_reads_done;
                assert(lw_micro_ops[load_index].isLoad());
                lw_micro_ops[load_index].setLoadStoreAddr(info.addr);
+               lw_micro_ops[load_index].setPayloadSize(info.size);
                ++num_reads_done;
             }
          }
@@ -252,6 +253,7 @@ void MicroOpPerformanceModel::CPUTraceGen(DynamicInstruction *dynins)
                size_t store_index = store_base_index + num_writes_done;
                assert(lw_micro_ops[store_index].isStore());
                lw_micro_ops[store_index].setLoadStoreAddr(info.addr);
+               lw_micro_ops[store_index].setPayloadSize(info.size);
                ++num_writes_done;
             }
          }
