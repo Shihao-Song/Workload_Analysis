@@ -7,6 +7,7 @@
 #include "stats.h"
 #include "subsecond_time.h"
 #include "dynamic_micro_op.h"
+#include "cpu_trace.pb.h"
 
 #include <fstream>
 
