@@ -27,13 +27,19 @@ MicroOpPerformanceModel::MicroOpPerformanceModel(Core *core, bool issue_memops)
     , m_dyninsn_count(0)
     , m_dyninsn_cost(0)
     , m_dyninsn_zero_count(0)
-    , cpu_trace_out_dir(Sim()->getCfg()->cpu_trace_out_dir)
-    , cpu_trace_gen_mode(strcmp(cpu_trace_out_dir.c_str(), "N/A") != 0 ? true : false)
+    , cpu_trace_out_dir(Sim()->getCfg()->cpu_trace_out_dir.c_str())
+    , cpu_trace_gen_mode(cpu_trace_out_dir != "N/A" ? true : false)
 {
    if (cpu_trace_gen_mode)
    {
+      GOOGLE_PROTOBUF_VERIFY_VERSION;
       std::cout << "[Performance model] CPU-trace generation mode. ";
       std::cout << "Performance model is disabled. \n";
+
+      if (cpu_trace_out_dir[cpu_trace_out_dir.size() - 1] != '/')
+      {
+         cpu_trace_out_dir += "/";
+      }
    }
 
    registerStatsMetric("performance_model", core->getId(), "dyninsn_count", &m_dyninsn_count);
@@ -264,17 +270,71 @@ void MicroOpPerformanceModel::CPUTraceGen(DynamicInstruction *dynins)
       }
    }
    
-   if (cpu_trace_gen_mode)
+   // Add micro-ops to protobuf
+   for (auto op : lw_micro_ops)
    {
-      CPUTraceOutput();
+      CPUTrace::MicroOp *micro_op = cpu_trace.add_micro_ops();
+
+      micro_op->set_eip(op.getEIP());
+
+      if (op.isStore() || op.isLoad())
+      {
+         if (op.isLoad()) {micro_op->set_opr(CPUTrace::MicroOp::LOAD);}
+         if (op.isStore()) {micro_op->set_opr(CPUTrace::MicroOp::STORE);}
+
+         micro_op->set_load_or_store_addr(op.getLoadStoreAddr());
+         micro_op->set_size(op.getPayloadSize());
+      }
    }
 }
 
 void MicroOpPerformanceModel::handleInstruction(DynamicInstruction *dynins)
 {
+   ++total_instructions;
    if (cpu_trace_gen_mode)
    {
+      if (!collecting)
+      {
+         if (++passed_instructions < fire_duration)
+         {
+            return;
+         }
+         else
+         {
+            collecting = true;
+            passed_instructions = 0;
+
+            // New round of trace collection is kick of here
+            std::string fn = cpu_trace_out_dir + std::to_string(num_fires_done) + ".cpu_trace";
+            output.open(fn);
+
+            cpu_trace.clear_micro_ops();
+            cpu_trace.set_start(total_instructions);
+         }
+      }
+
       CPUTraceGen(dynins);
+      
+      if (++collected_instructions == num_instructions)
+      {
+         collecting = false;
+         collected_instructions = 0;
+
+         cpu_trace.set_end(total_instructions);
+         if (!cpu_trace.SerializeToOstream(&output))
+         {
+            std::cerr << "Failed to generate trace file. \n";
+            exit(0);
+          }
+         output.close();
+
+         if (++num_fires_done == num_fires)
+         {
+            google::protobuf::ShutdownProtobufLibrary();
+            std::cout << "[Sniper] Done generating traces. \n";
+         }
+      }
+
       return; 
    }
 

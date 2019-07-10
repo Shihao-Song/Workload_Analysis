@@ -85,6 +85,7 @@ private:
       UInt64 size;
 
       void setEIP(UInt64 _eip) {eip = _eip;}
+      UInt64 getEIP() {return eip;}
 
       void setLoad() {opr = Operation::LOAD;}
       bool isLoad() {return opr == Operation::LOAD;}
@@ -96,51 +97,38 @@ private:
       bool isExe() {return opr == Operation::EXE;}
 
       void setLoadStoreAddr(UInt64 addr) {load_or_store_addr = addr;}
+      UInt64 getLoadStoreAddr() {return load_or_store_addr;}
+
       void setPayloadSize(UInt64 _size) {size = _size;}
+      UInt64 getPayloadSize() {return size;}
    };
    std::vector<Micro_Op_Light_Weight>lw_micro_ops;
 
    // The directory that contains all the generated CPU traces.
-   const String cpu_trace_out_dir;
+   std::string cpu_trace_out_dir;
 
    // Are we in CPU trace gen mode?
    const bool cpu_trace_gen_mode = false;
    // Collect traces every () instructions, default: 250M instructions.
-   const UInt64 fire_duration = 250000000;
+   // const UInt64 fire_duration = 250000000;
+   const UInt64 fire_duration = 400000;
    // Number of instructions to collect for every firing, default: 10M instructions.
-   const UInt64 num_instructions = 10000000;
+   // const UInt64 num_instructions = 10000000;
+   const UInt64 num_instructions = 100000;
    // Number of fires, default: 8
    const UInt64 num_fires = 8;
 
    // Define a protobuf object, cpu_trace;
    CPUTrace::TraceFile cpu_trace;
+   std::ofstream output;
+
+   bool collecting = false;
+   UInt64 total_instructions = 0;
    UInt64 passed_instructions = 0;
    UInt64 collected_instructions = 0;
    UInt64 num_fires_done = 0;
 
    void CPUTraceGen(DynamicInstruction *dynins);
-   void CPUTraceOutput()
-   {
-      /*
-      for (auto micro_op : lw_micro_ops)
-      {
-         if (micro_op.op_type == "Exe")
-         {
-            // std::cout << micro_op.op_type << " "
-            cpu_trace << micro_op.op_type << " "
-                      << micro_op.EIP << "\n";
-         }
-         else
-         {
-            // std::cout << micro_op.op_type << " "
-            cpu_trace << micro_op.op_type << " "
-                      << micro_op.EIP << " "
-                      << micro_op.address << "\n";
-         }
-      }
-      */
-   }
-
 };
 
 #endif // __MICRO_OP_PERFORMANCE_MODEL_H
