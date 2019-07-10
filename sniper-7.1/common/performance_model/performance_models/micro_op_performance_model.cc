@@ -172,7 +172,7 @@ void MicroOpPerformanceModel::CPUTraceGen(DynamicInstruction *dynins)
 
    size_t num_loads = 0;
    size_t num_stores = 0;
-   // size_t exec_base_index = SIZE_MAX;
+   
    // Find the first load
    size_t load_base_index = SIZE_MAX;
    // Find the first store
