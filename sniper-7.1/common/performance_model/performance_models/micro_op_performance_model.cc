@@ -277,10 +277,21 @@ void MicroOpPerformanceModel::CPUTraceGen(DynamicInstruction *dynins)
 
       micro_op->set_eip(op.getEIP());
 
-      if (op.isStore() || op.isLoad())
+      if (op.isExe())
       {
-         if (op.isLoad()) {micro_op->set_opr(CPUTrace::MicroOp::LOAD);}
-         if (op.isStore()) {micro_op->set_opr(CPUTrace::MicroOp::STORE);}
+         micro_op->set_opr(CPUTrace::MicroOp::EXE);
+      }
+      else
+      {
+         if (op.isLoad())
+         {
+            micro_op->set_opr(CPUTrace::MicroOp::LOAD);
+         }
+
+         if (op.isStore())
+         {
+            micro_op->set_opr(CPUTrace::MicroOp::STORE);
+         }
 
          micro_op->set_load_or_store_addr(op.getLoadStoreAddr());
          micro_op->set_size(op.getPayloadSize());
@@ -332,6 +343,7 @@ void MicroOpPerformanceModel::handleInstruction(DynamicInstruction *dynins)
          {
             google::protobuf::ShutdownProtobufLibrary();
             std::cout << "[Sniper] Done generating traces. \n";
+            exit(0);
          }
       }
 
