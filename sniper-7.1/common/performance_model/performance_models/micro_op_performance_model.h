@@ -113,8 +113,8 @@ private:
    const UInt64 fire_duration = 250000000;
    // Number of instructions to collect for every firing, default: 10M instructions.
    const UInt64 num_instructions = 10000000;
-   // Number of fires, default: 8
-   const UInt64 num_fires = 8;
+   // Number of fires, default: 12
+   const UInt64 num_fires = 12;
 
    // Define a protobuf object, cpu_trace;
    CPUTrace::TraceFile cpu_trace;
