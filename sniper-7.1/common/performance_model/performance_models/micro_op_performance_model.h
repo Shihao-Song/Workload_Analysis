@@ -7,7 +7,6 @@
 #include "stats.h"
 #include "subsecond_time.h"
 #include "dynamic_micro_op.h"
-#include "cpu_trace.pb.h"
 
 #include <fstream>
 
@@ -75,14 +74,17 @@ private:
 
       enum class Operation : int
       {
+         EXE,
+         BRANCH,
          LOAD,
          STORE,
-         EXE,
          MAX
       }opr;
 
       UInt64 load_or_store_addr; // L/S address
       UInt64 size;
+
+      bool taken; // For branch instruction
 
       void setEIP(UInt64 _eip) {eip = _eip;}
       UInt64 getEIP() {return eip;}
@@ -96,11 +98,17 @@ private:
       void setExe() {opr = Operation::EXE;}
       bool isExe() {return opr == Operation::EXE;}
 
+      void setBranch() {opr = Operation::BRANCH;}
+      bool isBranch() {return opr == Operation::BRANCH;}
+
       void setLoadStoreAddr(UInt64 addr) {load_or_store_addr = addr;}
       UInt64 getLoadStoreAddr() {return load_or_store_addr;}
 
       void setPayloadSize(UInt64 _size) {size = _size;}
       UInt64 getPayloadSize() {return size;}
+
+      void setTaken(bool _taken) {taken = _taken;}
+      bool isTaken() {return taken;}
    };
    std::vector<Micro_Op_Light_Weight>lw_micro_ops;
 
@@ -110,17 +118,17 @@ private:
    // Are we in CPU trace gen mode?
    const bool cpu_trace_gen_mode = false;
    // Collect traces every () instructions, default: 250M instructions.
-   const UInt64 fire_duration = 250000000;
+   // const UInt64 fire_duration = 250000000;
+   const UInt64 fire_duration = 0;
    // Number of instructions to collect for every firing, default: 10M instructions.
-   const UInt64 num_instructions = 10000000;
+   const UInt64 num_instructions = 250000000;
    // Number of fires, default: 12
-   const UInt64 num_fires = 12;
+   const UInt64 num_fires = 1;
 
-   // Define a protobuf object, cpu_trace;
-   CPUTrace::TraceFile cpu_trace;
    std::ofstream output;
 
    bool collecting = false;
+
    UInt64 total_instructions = 0;
    UInt64 passed_instructions = 0;
    UInt64 collected_instructions = 0;

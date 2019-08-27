@@ -32,10 +32,6 @@ MicroOpPerformanceModel::MicroOpPerformanceModel(Core *core, bool issue_memops)
 {
    if (cpu_trace_gen_mode)
    {
-      GOOGLE_PROTOBUF_VERIFY_VERSION;
-      std::cout << "[Performance model] CPU-trace generation mode. ";
-      std::cout << "Performance model is disabled. \n";
-
       if (cpu_trace_out_dir[cpu_trace_out_dir.size() - 1] != '/')
       {
          cpu_trace_out_dir += "/";
@@ -177,6 +173,8 @@ void MicroOpPerformanceModel::CPUTraceGen(DynamicInstruction *dynins)
    size_t load_base_index = SIZE_MAX;
    // Find the first store
    size_t store_base_index = SIZE_MAX;
+   // Find the first exe
+//   size_t exec_base_index = SIZE_MAX;
 
    lw_micro_ops.clear();
    assert(lw_micro_ops.size() == 0);
@@ -195,9 +193,21 @@ void MicroOpPerformanceModel::CPUTraceGen(DynamicInstruction *dynins)
 
          if (tmp->isExecute())
          {
-            micro_op.setExe();
-            // exec_base_index = m;
+            if (dynins->instruction->getType() == INST_BRANCH)
+            {
+               micro_op.setBranch();
+
+               bool taken = dynins->branch_info.taken;
+               micro_op.setTaken(taken);
+            }
+            else
+            {
+               micro_op.setExe();
+            }
+        
+//            exec_base_index = m;
          }
+
          if (tmp->isStore())
          {
             micro_op.setStore();
@@ -208,6 +218,7 @@ void MicroOpPerformanceModel::CPUTraceGen(DynamicInstruction *dynins)
                store_base_index = m;
             }
          }
+
          if (tmp->isLoad())
          {
             micro_op.setLoad();
@@ -218,6 +229,7 @@ void MicroOpPerformanceModel::CPUTraceGen(DynamicInstruction *dynins)
                load_base_index = m;
             }
          }
+
          lw_micro_ops.push_back(micro_op);
          m++;
       }
@@ -269,10 +281,36 @@ void MicroOpPerformanceModel::CPUTraceGen(DynamicInstruction *dynins)
          ++num_nonmem_done;
       }
    }
-   
+
    // Add micro-ops to protobuf
    for (auto op : lw_micro_ops)
    {
+      output << op.getEIP() << " ";
+      if (op.isExe())
+      {
+         output << "E\n";
+      }
+      else if (op.isBranch())
+      {
+         output << "B ";
+         output << op.isTaken() << "\n";
+      }
+      else
+      {
+         if (op.isLoad())
+         {
+            output << "L ";
+         }
+
+         if (op.isStore())
+         {
+            output << "S ";
+         }
+
+         output << op.getLoadStoreAddr() << " ";
+         output << op.getPayloadSize() << "\n";
+      }
+      /*
       CPUTrace::MicroOp *micro_op = cpu_trace.add_micro_ops();
 
       micro_op->set_eip(op.getEIP());
@@ -296,6 +334,7 @@ void MicroOpPerformanceModel::CPUTraceGen(DynamicInstruction *dynins)
          micro_op->set_load_or_store_addr(op.getLoadStoreAddr());
          micro_op->set_size(op.getPayloadSize());
       }
+      */
    }
 }
 
@@ -318,9 +357,6 @@ void MicroOpPerformanceModel::handleInstruction(DynamicInstruction *dynins)
             // New round of trace collection is kick of here
             std::string fn = cpu_trace_out_dir + std::to_string(num_fires_done) + ".cpu_trace";
             output.open(fn);
-
-            cpu_trace.clear_micro_ops();
-            cpu_trace.set_start(total_instructions);
          }
       }
 
@@ -331,22 +367,13 @@ void MicroOpPerformanceModel::handleInstruction(DynamicInstruction *dynins)
          collecting = false;
          collected_instructions = 0;
 
-         cpu_trace.set_end(total_instructions);
-         if (!cpu_trace.SerializeToOstream(&output))
-         {
-            std::cerr << "Failed to generate trace file. \n";
-            exit(0);
-          }
          output.close();
 
          if (++num_fires_done == num_fires)
          {
-            google::protobuf::ShutdownProtobufLibrary();
-            std::cout << "[Sniper] Done generating traces. \n";
             exit(0);
          }
       }
-
       return; 
    }
 
