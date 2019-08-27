@@ -118,8 +118,8 @@ private:
    // Are we in CPU trace gen mode?
    const bool cpu_trace_gen_mode = false;
    // Collect traces every () instructions, default: 250M instructions.
-   // const UInt64 fire_duration = 250000000;
-   const UInt64 fire_duration = 0;
+   const UInt64 fire_duration = 250000000;
+   // const UInt64 fire_duration = 0;
    // Number of instructions to collect for every firing, default: 10M instructions.
    const UInt64 num_instructions = 250000000;
    // Number of fires, default: 12

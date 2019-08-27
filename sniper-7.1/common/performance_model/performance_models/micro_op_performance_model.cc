@@ -310,31 +310,6 @@ void MicroOpPerformanceModel::CPUTraceGen(DynamicInstruction *dynins)
          output << op.getLoadStoreAddr() << " ";
          output << op.getPayloadSize() << "\n";
       }
-      /*
-      CPUTrace::MicroOp *micro_op = cpu_trace.add_micro_ops();
-
-      micro_op->set_eip(op.getEIP());
-
-      if (op.isExe())
-      {
-         micro_op->set_opr(CPUTrace::MicroOp::EXE);
-      }
-      else
-      {
-         if (op.isLoad())
-         {
-            micro_op->set_opr(CPUTrace::MicroOp::LOAD);
-         }
-
-         if (op.isStore())
-         {
-            micro_op->set_opr(CPUTrace::MicroOp::STORE);
-         }
-
-         micro_op->set_load_or_store_addr(op.getLoadStoreAddr());
-         micro_op->set_size(op.getPayloadSize());
-      }
-      */
    }
 }
 
@@ -351,6 +326,7 @@ void MicroOpPerformanceModel::handleInstruction(DynamicInstruction *dynins)
          }
          else
          {
+            std::cout << "Recording fire: " << num_fires_done << "\n";
             collecting = true;
             passed_instructions = 0;
 
